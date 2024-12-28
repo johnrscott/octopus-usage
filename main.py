@@ -66,6 +66,10 @@ def plot_both(x, b_monthly):
     
     x.pyplot(fig)
 
+@st.cache_data
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode("utf-8")
     
 if (e_file is not None) and (g_file is not None):
 
@@ -80,10 +84,16 @@ if (e_file is not None) and (g_file is not None):
     x = c[0].container(border=True)
     x.subheader("Electricity usage")
     show_usage(x, e_monthly)
+    x.download_button(label='📥 Download monthly electricity',
+                      data=convert_df(e_monthly),
+                      file_name= "electricity_monthly.csv")
     
     x = c[1].container(border=True)
     x.subheader("Gas usage")
     show_usage(x, g_monthly)
+    x.download_button(label='📥 Download monthly gas',
+                      data=convert_df(g_monthly),
+                      file_name= "gas_monthly.csv")
     
     # Join electricity and gas monthly readings
     left = e_monthly.rename(columns={"Cost (£)": "Electricity (£)"})
