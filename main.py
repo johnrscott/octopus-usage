@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 def read_csv(file_name):
     """Read an octopus energy CSV file
@@ -15,7 +17,6 @@ def read_csv(file_name):
         df["Cost (£)"] = df["cost_p"] / 100.0 
         df["date"] = pd.to_datetime(df["start"], utc=True)
         df["Month"] = df["date"].dt.year.astype("str") + "-" + df["date"].dt.month.astype("str")
-        print(df)
         return df.drop(columns="end")
 
 def by_month(df):
@@ -45,6 +46,26 @@ def show_usage(x, df):
     x.dataframe(df, column_config={
         "Cost (£)": st.column_config.NumberColumn("Cost", format="£ %.2f"),
         "Energy used (kWh)": st.column_config.NumberColumn("Usage", format="%.2f kWh")})
+
+def plot_both(x, b_monthly):
+
+    costs = {
+        "Electricity": b_monthly["Electricity (£)"],
+        "Gas":  b_monthly["Gas (£)"]
+    }
+
+    fig, ax = plt.subplots()
+    bottom = np.zeros(len(b_monthly))
+
+    for boolean, weight_count in costs.items():
+        p = ax.bar(b_monthly.index, weight_count, label=boolean, bottom=bottom)
+        bottom += weight_count
+
+    ax.legend(loc="upper right")
+    ax.yaxis.set_major_formatter('£ {x:.2f}')
+    
+    x.pyplot(fig)
+
     
 if (e_file is not None) and (g_file is not None):
 
@@ -75,8 +96,8 @@ if (e_file is not None) and (g_file is not None):
 
     x = d.container(border=True)
     x.subheader("Total monthly cost over time")
-    x.bar_chart(data=b_monthly, y=["Electricity (£)", "Gas (£)"])
-
+    plot_both(x, b_monthly)
+    
 else:
 
     d.info("Table will be shown when electricity and gas files are uploaded.")
