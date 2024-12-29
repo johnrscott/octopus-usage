@@ -33,7 +33,8 @@ def read_csv(file_name, prefix):
 
 c = st.container(border=True)
 c.header("Upload Octopus Smart Meter Data")
-c.write("Download CSV files of smart meter data from the Octopus website, and upload them here.")
+c.write("Download you Octopus energy smart meter data and upload it below.")
+c.info("To download the data, log on to your Octopus online account, and follow these steps:\n\n 1. Go into `Menu`, then click `My Bills` followed by `My Energy`, and look for `Get your energy geek on` (or something similar).\n2. Set the date range as large as possible, and download data for both electricity and gas (separately).\n3. Rename the files to make it clearer which is which (by default, the files both get called `download.csv`)")
 
 cols = c.columns(2)
 
