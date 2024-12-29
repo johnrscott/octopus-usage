@@ -42,16 +42,11 @@ g_file = c.file_uploader("Upload your gas file.")
 d = st.container(border=True)
 d.header(f"Monthly Usage")
 
-def show_usage(x, df):
-    x.dataframe(df, column_config={
-        "Cost (£)": st.column_config.NumberColumn("Cost", format="£ %.2f"),
-        "Energy used (kWh)": st.column_config.NumberColumn("Usage", format="%.2f kWh")})
-
 def plot_both(x, b_monthly):
 
     costs = {
-        "Electricity": b_monthly["Electricity (£)"],
-        "Gas":  b_monthly["Gas (£)"]
+        "Electricity": b_monthly["elec_cost"],
+        "Gas":  b_monthly["gas_cost"]
     }
 
     fig, ax = plt.subplots()
@@ -79,34 +74,46 @@ if (e_file is not None) and (g_file is not None):
     e_monthly = by_month(e_df)
     g_monthly = by_month(g_df)
 
-    c = d.columns(2)
+    # Join electricity and gas monthly readings
+    left = e_monthly.rename(columns={
+        "Cost (£)": "elec_cost",
+        "Energy used (kWh)": "elec_kwh",
+    })
+    right = g_monthly.rename(columns={
+        "Cost (£)": "gas_cost",
+        "Energy used (kWh)": "gas_kwh",
+    })
 
-    x = c[0].container(border=True)
-    x.subheader("Electricity usage")
-    show_usage(x, e_monthly)
-    x.download_button(label='📥 Download monthly electricity',
+    b_monthly = left.merge(right,
+                           left_index=True,
+                           right_index=True,
+                           how="outer")
+
+    b_monthly["total_kwh"] = b_monthly["elec_kwh"] + b_monthly["gas_kwh"]
+    b_monthly["total_cost"] = b_monthly["elec_cost"] + b_monthly["gas_cost"]
+
+    d.dataframe(b_monthly, column_config={
+        "elec_kwh": st.column_config.NumberColumn(
+            "Electricity Use", format="£ %.1f kWh"),
+        "elec_cost": st.column_config.NumberColumn(
+            "Electricity Cost", format="£ %.2f"),
+
+        "gas_kwh": st.column_config.NumberColumn(
+            "Gas Use", format="£ %.1f kWh"),
+        "gas_cost": st.column_config.NumberColumn(
+            "Gas Cost", format="£ %.2f"),
+
+        "total_kwh": st.column_config.NumberColumn(
+            "Total Use", format="£ %.1f kWh"),
+        "total_cost": st.column_config.NumberColumn(
+            "Total Cost", format="£ %.2f"),
+        }, use_container_width=True)
+
+
+    d.download_button(label='📥 Download monthly usage',
                       data=convert_df(e_monthly),
                       file_name= "electricity_monthly.csv")
-    
-    x = c[1].container(border=True)
-    x.subheader("Gas usage")
-    show_usage(x, g_monthly)
-    x.download_button(label='📥 Download monthly gas',
-                      data=convert_df(g_monthly),
-                      file_name= "gas_monthly.csv")
-    
-    # Join electricity and gas monthly readings
-    left = e_monthly.rename(columns={"Cost (£)": "Electricity (£)"})
-    right = g_monthly.rename(columns={"Cost (£)": "Gas (£)"})
-
-    b_monthly =left.merge(right,
-                          left_index=True,
-                          right_index=True,
-                          how="outer")
-
-    x = d.container(border=True)
-    x.subheader("Total monthly cost over time")
-    plot_both(x, b_monthly)
+    plot_both(d, b_monthly)
     
 else:
 
