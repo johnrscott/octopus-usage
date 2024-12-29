@@ -94,17 +94,17 @@ if (e_file is not None) and (g_file is not None):
 
     d.dataframe(b_monthly, column_config={
         "elec_kwh": st.column_config.NumberColumn(
-            "Electricity Use", format="£ %.1f kWh"),
+            "Electricity Use", format="%.1f kWh"),
         "elec_cost": st.column_config.NumberColumn(
             "Electricity Cost", format="£ %.2f"),
 
         "gas_kwh": st.column_config.NumberColumn(
-            "Gas Use", format="£ %.1f kWh"),
+            "Gas Use", format="%.1f kWh"),
         "gas_cost": st.column_config.NumberColumn(
             "Gas Cost", format="£ %.2f"),
 
         "total_kwh": st.column_config.NumberColumn(
-            "Total Use", format="£ %.1f kWh"),
+            "Total Use", format="%.1f kWh"),
         "total_cost": st.column_config.NumberColumn(
             "Total Cost", format="£ %.2f"),
         }, use_container_width=True)
